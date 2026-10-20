@@ -12,14 +12,24 @@ Two goals:
 
 ## Install
 
+One line, no clone:
+
 ```sh
-git clone https://github.com/<you>/alacritty-tmux-setup.git
-cd alacritty-tmux-setup
-./scripts/install.sh
+curl -fsSL https://raw.githubusercontent.com/PamelaSprin47685ghall/alacritty-tmux-setup/main/install.sh | bash
 ```
 
-The script backs up anything it overwrites (`*.bak.<epoch>`), then validates
-both files with `alacritty migrate --dry-run` and a throwaway tmux server.
+Or from a checkout:
+
+```sh
+git clone https://github.com/PamelaSprin47685ghall/alacritty-tmux-setup.git
+cd alacritty-tmux-setup
+./install.sh
+```
+
+The script is self-contained — the configs are inlined — so it does not care
+about its working directory. It backs up anything it overwrites
+(`*.bak.<epoch>`), then validates both files with `alacritty migrate --dry-run`
+and a throwaway tmux server.
 
 Requirements: `alacritty`, `tmux`. The config assumes the font
 `Sarasa Term SC` is already installed — swap `font.normal.family` if not.
@@ -28,8 +38,11 @@ Requirements: `alacritty`, `tmux`. The config assumes the font
 
 | File | Purpose |
 | --- | --- |
-| `~/.config/alacritty/alacritty.toml` | visuals, font, `Shift+Enter` key binding, `[terminal] shell = tmux new-session` |
+| `~/.config/alacritty/alacritty.toml` (or `$XDG_CONFIG_HOME`) | visuals, font, `Shift+Enter` key binding, `[terminal] shell = tmux new-session` |
 | `~/.tmux.conf` | `extended-keys on`, `mouse on`, vi copy mode, status bar styling |
+
+A legacy `~/.alacritty.toml` is retired to a backup, since the XDG file would
+shadow it and the two could drift apart.
 
 ## Why `Shift+Enter` needs all of this
 
