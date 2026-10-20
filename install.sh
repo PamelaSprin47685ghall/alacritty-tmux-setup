@@ -29,6 +29,51 @@ backup() {
     say "backup: $1.bak.$STAMP"
 }
 
+# --- font ---------------------------------------------------------------
+# Alacritty needs a font that covers CJK. Prefer the distro package; fall back
+# to the upstream release when the distro has none (Ubuntu has no sarasa
+# package). Skipped entirely when the family already resolves.
+FONT_FAMILY="Sarasa Term SC"
+SARASA_VERSION="1.0.42"
+
+font_present() {
+    command -v fc-match >/dev/null 2>&1 || return 0   # cannot tell; do not touch
+    fc-match "$FONT_FAMILY" 2>/dev/null | grep -qi "Sarasa"
+}
+
+install_font() {
+    font_present && { say "font: $FONT_FAMILY already installed"; return 0; }
+
+    say "font: $FONT_FAMILY missing, installing"
+
+    if command -v pacman >/dev/null 2>&1; then
+        # Manjaro/Arch ship the family in extra/ttf-sarasa-gothic.
+        sudo -n pacman -S --needed --noconfirm ttf-sarasa-gothic
+
+    elif command -v apt-get >/dev/null 2>&1; then
+        # No sarasa package in Ubuntu/Debian, so unpack the upstream release.
+        sudo -n apt-get install -y 7zip
+        tmp="$(mktemp -d)"
+        trap 'rm -rf "$tmp"' EXIT
+        curl -fsSL -o "$tmp/sarasa.7z" \
+            "https://github.com/be5invis/Sarasa-Gothic/releases/download/v$SARASA_VERSION/SarasaTermSC-TTF-$SARASA_VERSION.7z"
+        7z x -y -o"$tmp/fonts" "$tmp/sarasa.7z" >/dev/null
+        sudo -n install -d /usr/share/fonts/truetype/sarasa-term-sc
+        sudo -n cp "$tmp"/fonts/*.ttf /usr/share/fonts/truetype/sarasa-term-sc/
+        sudo -n chmod 644 /usr/share/fonts/truetype/sarasa-term-sc/*.ttf
+        sudo -n fc-cache -f >/dev/null
+
+    else
+        say "font: no supported package manager, install '$FONT_FAMILY' manually"
+        return 0
+    fi
+
+    font_present && say "font: $FONT_FAMILY installed" \
+                 || die "font: $FONT_FAMILY still does not resolve"
+}
+
+install_font
+
 # --- write alacritty config ---------------------------------------------
 mkdir -p "$(dirname "$ALACRITTY_CFG")"
 backup "$ALACRITTY_CFG"
