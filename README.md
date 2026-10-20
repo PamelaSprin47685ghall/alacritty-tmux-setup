@@ -31,8 +31,13 @@ about its working directory. It backs up anything it overwrites
 (`*.bak.<epoch>`), then validates both files with `alacritty migrate --dry-run`
 and a throwaway tmux server.
 
-Requirements: `alacritty`, `tmux`. The config assumes the font
-`Sarasa Term SC` is already installed — swap `font.normal.family` if not.
+Requirements: `alacritty`, `tmux`, `curl`.
+
+The config uses `Sarasa Term SC` for CJK coverage. The script installs it when
+missing: `ttf-sarasa-gothic` via pacman where available, otherwise the upstream
+`SarasaTermSC` release unpacked with `7zip` (Ubuntu/Debian has no such package).
+It needs root: run as root or with passwordless `sudo`, and it is a no-op when
+the family already resolves.
 
 ## What gets written
 

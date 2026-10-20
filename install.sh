@@ -18,6 +18,18 @@ LEGACY_CFG="$HOME/.alacritty.toml"
 STAMP="$(date +%s)"
 
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+
+# Run a privileged command as root: directly when already root, otherwise via
+# passwordless sudo. Anything else is reported instead of hanging on a prompt.
+as_root() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    elif sudo -n true 2>/dev/null; then
+        sudo -n "$@"
+    else
+        die "need root for: $*  (re-run as root, or grant passwordless sudo)"
+    fi
+}
 say() { printf '%s\n' "$*"; }
 
 command -v alacritty >/dev/null || die "alacritty not installed"
@@ -48,20 +60,20 @@ install_font() {
 
     if command -v pacman >/dev/null 2>&1; then
         # Manjaro/Arch ship the family in extra/ttf-sarasa-gothic.
-        sudo -n pacman -S --needed --noconfirm ttf-sarasa-gothic
+        as_root pacman -S --needed --noconfirm ttf-sarasa-gothic
 
     elif command -v apt-get >/dev/null 2>&1; then
         # No sarasa package in Ubuntu/Debian, so unpack the upstream release.
-        sudo -n apt-get install -y 7zip
+        as_root apt-get install -y 7zip
         tmp="$(mktemp -d)"
         trap 'rm -rf "$tmp"' EXIT
         curl -fsSL -o "$tmp/sarasa.7z" \
             "https://github.com/be5invis/Sarasa-Gothic/releases/download/v$SARASA_VERSION/SarasaTermSC-TTF-$SARASA_VERSION.7z"
         7z x -y -o"$tmp/fonts" "$tmp/sarasa.7z" >/dev/null
-        sudo -n install -d /usr/share/fonts/truetype/sarasa-term-sc
-        sudo -n cp "$tmp"/fonts/*.ttf /usr/share/fonts/truetype/sarasa-term-sc/
-        sudo -n chmod 644 /usr/share/fonts/truetype/sarasa-term-sc/*.ttf
-        sudo -n fc-cache -f >/dev/null
+        as_root install -d /usr/share/fonts/truetype/sarasa-term-sc
+        as_root cp "$tmp"/fonts/*.ttf /usr/share/fonts/truetype/sarasa-term-sc/
+        as_root chmod 644 /usr/share/fonts/truetype/sarasa-term-sc/*.ttf
+        as_root fc-cache -f >/dev/null
 
     else
         say "font: no supported package manager, install '$FONT_FAMILY' manually"
