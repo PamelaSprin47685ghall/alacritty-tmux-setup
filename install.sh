@@ -45,8 +45,7 @@ live_config_reload = true
 opacity = 0.9
 startup_mode = "Maximized"
 decorations = "None"
-dynamic_padding = true
-padding = { x = 10, y = 8 }
+padding = { x = 0, y = 0 }
 dynamic_title = true
 
 [font]
@@ -142,6 +141,13 @@ set -g renumber-windows on
 set -g history-limit 50000
 set -g set-clipboard on
 set -g display-time 2000
+
+# Report the active pane's title to the outer terminal, so the Alacritty window
+# title follows whatever runs inside tmux. Requires `allow-rename` for programs
+# to push their own titles, and Alacritty's `dynamic_title` to display them.
+set -g set-titles on
+set -g set-titles-string "#T"
+set -g allow-rename on
 setw -g mode-keys vi
 setw -g monitor-activity on
 set -g visual-activity off

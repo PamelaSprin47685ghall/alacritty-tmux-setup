@@ -39,10 +39,19 @@ Requirements: `alacritty`, `tmux`. The config assumes the font
 | File | Purpose |
 | --- | --- |
 | `~/.config/alacritty/alacritty.toml` (or `$XDG_CONFIG_HOME`) | visuals, font, `Shift+Enter` key binding, `[terminal] shell = tmux new-session` |
-| `~/.tmux.conf` | `extended-keys on`, `mouse on`, vi copy mode, status bar styling |
+| `~/.tmux.conf` | `extended-keys on`, `mouse on`, vi copy mode, status bar styling, window-title propagation |
 
 A legacy `~/.alacritty.toml` is retired to a backup, since the XDG file would
 shadow it and the two could drift apart.
+
+## Edge-to-edge and dynamic title
+
+The Alacritty window has no padding (`padding = { x = 0, y = 0 }`) and no
+decorations, so text sits flush against the screen edge.
+
+The window title follows the active pane: `set-titles on` makes tmux report it,
+`allow-rename on` lets programs inside the pane push their own title, and
+Alacritty's `dynamic_title = true` renders it.
 
 ## Why `Shift+Enter` needs all of this
 
